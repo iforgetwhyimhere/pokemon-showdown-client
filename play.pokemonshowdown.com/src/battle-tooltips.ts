@@ -1453,8 +1453,8 @@ export class BattleTooltips {
 		const isTransformed = clientPokemon?.volatiles.transform;
 		if (!serverPokemon || isTransformed) {
 			if (!clientPokemon) throw new Error('Must pass either clientPokemon or serverPokemon');
-			let [min, max] = this.getSpeedRange(clientPokemon);
-			return `<p><small>Spe</small> ${min} to ${max} <small>(before items/abilities/modifiers)</small></p>`;
+			let {min, ev0, ev252, max} = this.getSpeedRange(clientPokemon);
+			return `<p><small>Spe</small> ${min}-${ev0} to ${ev252}-${max}<br><small>(before items/abilities/modifiers)</small></p>`;
 		}
 		const stats = serverPokemon.stats;
 		const modifiedStats = this.calculateModifiedStats(clientPokemon, serverPokemon);
@@ -1538,7 +1538,7 @@ export class BattleTooltips {
 	/**
 	 * Calculates possible Speed stat range of an opponent
 	 */
-	getSpeedRange(pokemon: Pokemon): [number, number] {
+	getSpeedRange(pokemon: Pokemon): {min: number, ev0: number, ev252: number, max: number} {
 		const tr = Math.trunc || Math.floor;
 		const species = pokemon.getSpecies();
 		let rules = this.battle.rules;
@@ -1580,9 +1580,13 @@ export class BattleTooltips {
 		let maxIv = (gen < 3) ? 30 : 31;
 
 		let min;
+		let ev0;
+		let ev252;
 		let max;
 		if (tier.includes("Let's Go")) {
 			min = tr(tr(tr(2 * baseSpe * level / 100 + 5) * minNature) * tr((70 / 255 / 10 + 1) * 100) / 100);
+			ev0 = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5) * 1) * tr((70 / 255 / 10 + 1) * 100) / 100);
+			ev252 = tr(tr(tr((2 * baseSpe + 31 + 63) * level / 100 + 5) * 1) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			max = tr(tr(tr((2 * baseSpe + maxIv) * level / 100 + 5) * maxNature) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			if (tier.includes('No Restrictions')) max += 200;
 			else if (tier.includes('Random')) max += 20;
@@ -1592,9 +1596,11 @@ export class BattleTooltips {
 		} else {
 			let maxIvEvOffset = maxIv + ((isRandomBattle && gen >= 3) ? 21 : 63);
 			max = tr(tr((2 * baseSpe + maxIvEvOffset) * level / 100 + 5) * maxNature);
+			ev252 = tr(tr((2 * baseSpe + 31 + 63) * level / 100 + 5) * 1);
+			ev0 = tr(tr((2 * baseSpe + 31) * level / 100 + 5) * 1);
 			min = isCGT ? max : tr(tr(2 * baseSpe * level / 100 + 5) * minNature);
 		}
-		return [min, max];
+		return {min, ev0, ev252, max};
 	}
 
 	/**
@@ -2303,7 +2309,7 @@ export class BattleTooltips {
 		}
 		// Moves that check opponent speed
 		if (move.id === 'electroball' && target) {
-			let [minSpe, maxSpe] = this.getSpeedRange(target);
+			let {min: minSpe, max: maxSpe} = this.getSpeedRange(target);
 			let minRatio = (modifiedStats.spe / maxSpe);
 			let maxRatio = (modifiedStats.spe / minSpe);
 			let min;
@@ -2324,7 +2330,7 @@ export class BattleTooltips {
 			value.setRange(min, max);
 		}
 		if (move.id === 'gyroball' && target) {
-			let [minSpe, maxSpe] = this.getSpeedRange(target);
+			let {min: minSpe, max: maxSpe} = this.getSpeedRange(target);
 			let min = (Math.floor(25 * minSpe / modifiedStats.spe) || 1);
 			if (min > 150) min = 150;
 			let max = (Math.floor(25 * maxSpe / modifiedStats.spe) || 1);
