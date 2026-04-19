@@ -1592,6 +1592,8 @@ export class BattleTooltips {
 			else if (tier.includes('Random')) max += 20;
 		} else if (tier.includes('Champions')) {
 			min = tr(minNature * (baseSpe + 20));
+			ev0 = tr(baseSpe + 20);
+			ev252 = tr(baseSpe + 32 + 20);
 			max = tr(maxNature * (baseSpe + 32 + 20));
 		} else {
 			let maxIvEvOffset = maxIv + ((isRandomBattle && gen >= 3) ? 21 : 63);
