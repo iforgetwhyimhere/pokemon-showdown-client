@@ -1906,8 +1906,8 @@ export class BattleTooltips {
 					factor = 1;
 					break;
 				}
-				// Inverse replaces immunities with weaknesses. This has to 
-				// be coded here, else it won't calculate secondary type's 
+				// Inverse replaces immunities with weaknesses. This has to
+				// be coded here, else it won't calculate secondary type's
 				// effectiveness. It sets a resistance to be consistent with
 				// the inversion done at the end.
 				if (inverse) {
