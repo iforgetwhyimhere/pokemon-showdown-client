@@ -1905,7 +1905,15 @@ export class BattleTooltips {
 					factor = 1;
 					break;
 				}
-				factor = 0;
+				// Inverse replaces immunities with weaknesses. This has to 
+				// be coded here, else it won't calculate secondary type's 
+				// effectiveness. It sets a resistance to be consistent with
+				// the inversion done at the end.
+				if (this.battle.rules['Inverse Mod']) {
+					factor *= 0.5;
+				} else {
+					factor = 0;
+				}
 			} else if (move.id === 'freezedry' && targetType === 'Water') {
 				factor *= 2;
 			} else {
@@ -1975,6 +1983,11 @@ export class BattleTooltips {
 			return factor;
 		}
 		if (hardcoreMode) return factor;
+
+		// Inverse Mod reverses effectiveness
+		if (this.battle.rules['Inverse Mod']) {
+			return 1 / (factor * otherFactor);
+		}
 		return factor * otherFactor;
 	}
 	getMoveTypeText(move: Dex.Move, value: ModifiableValue, forMaxMove?: boolean | Dex.Move) {
