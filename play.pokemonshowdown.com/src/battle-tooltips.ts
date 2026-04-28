@@ -1839,6 +1839,7 @@ export class BattleTooltips {
 			return 1;
 		}
 		const hardcoreMode = this.battle.hardcoreMode;
+		const inverse = this.battle.rules['Inverse Mod'];
 		const targetTypes = target.getTypeList();
 		const sourceAbility = source.effectiveAbility();
 		// Mold Breaker doesn't ignore _everything_, but it sure ignores everything that affects effectiveness
@@ -1909,7 +1910,7 @@ export class BattleTooltips {
 				// be coded here, else it won't calculate secondary type's 
 				// effectiveness. It sets a resistance to be consistent with
 				// the inversion done at the end.
-				if (this.battle.rules['Inverse Mod']) {
+				if (inverse) {
 					factor *= 0.5;
 				} else {
 					factor = 0;
@@ -1978,14 +1979,18 @@ export class BattleTooltips {
 			return factor * otherFactor === 0 ? 0 : 1;
 		}
 		if (hardcoreMode && dex.gen <= 9) {
-			if (factor > 2) return 2;
-			if (factor < 0.5) return 0.5;
+			if (factor > 2) factor = 2;
+			if (factor < 0.5) factor = 0.5;
+			if (inverse && dex.gen >= 7) return 1 / factor;
 			return factor;
 		}
-		if (hardcoreMode) return factor;
+		if (hardcoreMode) {
+			if (inverse && dex.gen >= 7) return 1 / factor;
+			return factor;
+		}
 
 		// Inverse Mod reverses effectiveness
-		if (this.battle.rules['Inverse Mod']) {
+		if (inverse) {
 			return 1 / (factor * otherFactor);
 		}
 		return factor * otherFactor;
